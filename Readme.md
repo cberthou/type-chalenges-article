@@ -271,6 +271,18 @@ valide pour une promise.
 
 #### Implémentation
 
+Dans un premier temps, nous gérons le cas de promesse non "nested".
+
+```typescript
+type MyAwaited<T extends PromiseLike<any>> =
+    T extends PromiseLike<infer R> ?
+        R :
+        never;
+```
+
+Dans le cas ou `R` est une promesse, nous voulons récupérer son résultat. Il nous suffit d'ajouter un appel récursif à
+MyAwaited si `R` est de type `PromiseLike`.
+
 ```typescript
 type MyAwaited<T extends PromiseLike<any>> =
     T extends PromiseLike<infer R> ?
@@ -278,4 +290,23 @@ type MyAwaited<T extends PromiseLike<any>> =
             MyAwaited<R> :
             R:
         never;
+```
+
+### [268 - If](https://github.com/type-challenges/type-challenges/blob/main/questions/00268-easy-if/README.md)
+
+#### Présentation
+
+```typescript
+type A = If<true, 'a', 'b'>  // expected to be 'a'
+type B = If<false, 'a', 'b'> // expected to be 'b'
+```
+
+Créer un générique `If` retournant le deuxième argument si le premier est `true`, et le 3ème sinon
+
+#### Implémentation
+
+Implémentation plutôt directe, RAS.
+
+```typescript
+type If<C extends boolean, T, F> = C extends true ? T : F;
 ```
