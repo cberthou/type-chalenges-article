@@ -310,3 +310,67 @@ Implémentation plutôt directe, RAS.
 ```typescript
 type If<C extends boolean, T, F> = C extends true ? T : F;
 ```
+
+### [533 - Concat](https://github.com/type-challenges/type-challenges/blob/main/questions/00533-easy-concat/README.md)
+
+#### Présentation
+
+```typescript
+type Result = Concat<[1], [2]> // expected to be [1, 2]
+```
+
+Créer un générique `Concat` retournant la concaténation des 2 tableaux en paramètre
+
+#### Concepts
+
+- Array Spread. Typescript permet de `spread` des tuples. Par exemple, pour ajouter un élément à la fin d'un tuple :
+```typescript
+type AddElementToTuple<T extends any[], U> = [...T, U]; 
+```
+
+#### Implémentation
+
+Implémentation plutôt directe, RAS.
+
+```typescript
+type Concat<T extends any[], U extends any[]> = [...T, ...U];
+```
+
+### [898 - Includes](https://github.com/type-challenges/type-challenges/blob/main/questions/00898-easy-includes/README.md)
+
+#### Présentation
+
+```typescript
+type isPillarMen = Includes<['Kars', 'Esidisi', 'Wamuu', 'Santana'], 'Dio'> // expected to be `false`
+```
+
+Créer un générique `Includes` déterminant si un tuple contient un type donné.
+
+#### Concepts
+
+- Vous pouvez utiliser des génériques dans les opérateurs ternaires de types. Exemple :
+```typescript
+
+type assertion = Equal<T1, T2> extends true ? "egaux" : "non-égaux"
+```
+
+#### Implémentation
+
+Gérons d'abord le cas où le premier élément est du bon type :
+
+```typescript
+type Includes<T extends readonly any[], U> = T extends readonly [infer Head, ...infer Tail] ?
+    Equal<Head, U> :
+    false
+```
+
+Si le premier élement n'est pas du bon type, il faut faire un appel récursif à `Includes` sur le reste du tuple. Pour
+faire notre ternaire, nous utilisons : `Equal<Head, U> extends true`
+
+```typescript
+type Includes<T extends readonly any[], U> = T extends readonly [infer Head, ...infer Tail] ?
+    Equal<Head, U> extends true ?
+        true:
+        Includes<Tail, U> :
+    false
+```
