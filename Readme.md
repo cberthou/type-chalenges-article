@@ -437,3 +437,163 @@ type MyParameters<T extends (...args: any[]) => any> =
         Args : 
         never;
 ```
+
+## Les challenges "medium"
+
+### [2 - Get Return Type](https://github.com/type-challenges/type-challenges/blob/main/questions/00002-medium-return-type/README.md)
+
+#### Présentation
+
+```typescript
+const fn = (v: boolean) => {
+    if (v)
+        return 1
+    else
+        return 2
+}
+
+type a = MyReturnType<typeof fn> // should be "1 | 2"
+```
+
+Implémenter le générique `ReturnType` de typescript qui récupère le type de retour d'une fonction.
+
+#### Concepts
+
+- L'opérateur `infer` peut aussi être utilisé sur le type de retour d'une fonction
+
+#### Implémentation
+
+En sachant que `infer` peut être utilisé sur le type de retour d'une fonction, l'implémentation est plutôt directe.
+
+```typescript
+type MyReturnType<T extends (...args: any) => any> =
+    T extends (...args: any) => infer Return ?
+        Return :
+        never
+```
+
+### [3 - Omit](https://github.com/type-challenges/type-challenges/blob/main/questions/00003-medium-omit/README.md)
+
+#### Présentation
+
+```typescript
+interface Todo {
+    title: string
+    description: string
+    completed: boolean
+}
+
+type TodoPreview = MyOmit<Todo, 'description' | 'title'>
+
+const todo: TodoPreview = {
+    completed: false,
+}
+
+```
+
+Implémenter le générique `Omit` de typescript qui retire des propriétés d'un objet.
+
+#### Concepts
+
+- Le générique `Exclude` est built-in dans Typescript
+
+#### Implémentation
+
+Il nous suffit de retirer les clés devant être ignorées grâce à `Exclude`
+
+```typescript
+type MyOmit<T, K extends keyof T> = {
+    [Key in Exclude<keyof T, K>]: T[Key]
+}
+```
+
+### [8 - Readonly 2](https://github.com/type-challenges/type-challenges/blob/main/questions/00008-medium-readonly-2/README.md)
+
+#### Présentation
+
+```typescript
+interface Todo {
+    title: string
+    description: string
+    completed: boolean
+}
+
+const todo: MyReadonly2<Todo, 'title' | 'description'> = {
+    title: "Hey",
+    description: "foobar",
+    completed: false,
+}
+
+todo.title = "Hello" // Error: cannot reassign a readonly property
+todo.description = "barFoo" // Error: cannot reassign a readonly property
+todo.completed = true // OK
+```
+
+Implémenter un générique `MyReadonly2<T, K>` qui permet de transformer les propriétés `K` de `T` en readonly.
+
+#### Concepts
+
+- Les génériques `Pick` et `Omit` sont built-in dans Typescript
+
+#### Implémentation
+
+Créons un objet contenant les propriétés à marquer en readonly
+
+```typescript
+type MyReadonly2<T, K extends keyof T> = {
+    readonly [Key in K]: T[Key]
+} 
+```
+
+Lorsque le 2ème paramètre n'est pas fourni, toutes les valeurs passent en readonly. Mettons lui une valeur par
+défaut.
+
+```typescript
+type MyReadonly2<T, K extends keyof T = keyof T> = {
+    readonly [Key in K]: T[Key]
+} 
+```
+
+Ajoutons ensuite les éléments qui ne seront pas en readonly
+
+```typescript
+type MyReadonly2<T, K extends keyof T = keyof T> = {
+  readonly [Key in K]: T[Key]
+} & {
+  [Key in Exclude<keyof T, K>]: T[Key]
+}
+```
+
+Il semble y avoir un problème sur le dernier test.
+
+```typescript
+type T = MyReadonly2<Todo2, 'description'>
+/*
+type T = {
+    readonly description?: string | undefined;
+} & {
+    title: string;
+    completed: boolean;
+}
+ */
+```
+
+Or nous voulons :
+```typescript
+interface Expected {
+  readonly title: string
+  readonly description?: string
+  completed: boolean
+}
+```
+
+Le readonly du title a disparu. Pour le conserver, nous avons l'astuce suivante. En effet,
+lorsque le `keyof` est accolé au `in`, le modificateur `readonly` est conservé.
+
+```typescript
+type MyReadonly2<T, K extends keyof T = keyof T> = {
+    readonly [Key in K]: T[Key]
+} & {
+    [Key in keyof Omit<T, K>]: T[Key]
+}
+```
