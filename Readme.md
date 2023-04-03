@@ -374,3 +374,66 @@ type Includes<T extends readonly any[], U> = T extends readonly [infer Head, ...
         Includes<Tail, U> :
     false
 ```
+
+### [3057 - Push](https://github.com/type-challenges/type-challenges/blob/main/questions/03057-easy-push/README.md)
+
+#### Présentation
+
+```typescript
+type Result = Push<[1, 2], '3'> // [1, 2, '3']
+```
+
+Créer un générique pour ajouter un élément à la fin d'un tuple
+
+#### Implémentation
+
+En utilisant le spread operator, rien de bien compliqué
+
+```typescript
+type Push<T extends any[], U> = [...T, U]
+```
+
+### [3060 - Unshift](https://github.com/type-challenges/type-challenges/blob/main/questions/03060-easy-unshift/README.md)
+
+#### Présentation
+
+```typescript
+type Result = Unshift<[1, 2], 0> // [0, 1, 2,]
+```
+
+Créer un générique pour ajouter un élément au début d'un tuple
+
+#### Implémentation
+
+En utilisant le spread operator, rien de bien compliqué
+
+```typescript
+type Unshift<T extends any[], U> = [U, ...T]
+```
+
+### [3312 - Parameters](https://github.com/type-challenges/type-challenges/blob/main/questions/03312-easy-parameters/README.md)
+
+#### Présentation
+
+```typescript
+const foo = (arg1: string, arg2: number): void => {}
+
+type FunctionParamsType = MyParameters<typeof foo> // [arg1: string, arg2: number]
+```
+
+Créer un générique permettant d'extraire le type des paramètres d'une fonction
+
+#### Concepts
+
+- L'opérateur `infer` peut aussi être utilisé sur les arguments d'une fonction.
+
+#### Implémentation
+
+En sachant que `infer` peut être utilisé sur les arguments d'une fonction, l'implémentation est plutôt directe.
+
+```typescript
+type MyParameters<T extends (...args: any[]) => any> = 
+    T extends (...args: infer Args) => any ? 
+        Args : 
+        never;
+```
