@@ -241,10 +241,41 @@ type Result = MyExclude<'a' | 'b' | 'c', 'a'> // 'b' | 'c'
 
 Créer un générique permettant de retirer un pour plusieurs types d'une union de types.
 
-#### Concepts
-
 #### Implémentation
 
 ```typescript
 type MyExclude<T, U> = T extends U ? never : T
+```
+
+### [189 - Awaited](https://github.com/type-challenges/type-challenges/blob/main/questions/00189-easy-awaited/README.md)
+
+#### Présentation
+
+```typescript
+type ExampleType = Promise<string>
+
+type Result = MyAwaited<ExampleType> // string
+```
+
+Créer un générique permettant de récupérer le type d'une promise
+
+#### Concepts
+- `infer` permet de récupérer le type dans une assertion.
+```typescript
+type Example<T extends Array<any>> = T extends Array<infer R> ? R : never
+type Str = Example<string[]>
+// Str = string
+```
+- `PromiseLike` est une implémentation minimaliste de la promise. C'est simplement un objet ayant une méthode `then()`
+valide pour une promise.
+
+#### Implémentation
+
+```typescript
+type MyAwaited<T extends PromiseLike<any>> =
+    T extends PromiseLike<infer R> ?
+        R extends PromiseLike<any> ?
+            MyAwaited<R> :
+            R:
+        never;
 ```
